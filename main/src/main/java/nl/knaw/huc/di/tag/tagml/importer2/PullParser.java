@@ -26,7 +26,7 @@ import java.util.List;
 
 public class PullParser {
 
-    private final ExpectationTreeNode expectations;
+    private ExpectationTreeNode expectations;
 
     public PullParser(ExpectationTreeNode expectations) {
         this.expectations = expectations;
@@ -63,6 +63,7 @@ public class PullParser {
             }
             // based on the current expectations and the actual we generate new expectations
             // TODO
+            this.expectations = rewriteExpectations(expectations, t);
         }
 
 
@@ -79,5 +80,24 @@ public class PullParser {
 //
 
         return null;
+    }
+
+    private ExpectationTreeNode rewriteExpectations(ExpectationTreeNode expectations, Token t) {
+        if (expectations.getClass() == AndNode.class) {
+            return rewriteAndExpectations((AndNode) expectations, t);
+        } else {
+            throw new UnsupportedOperationException("Unknown expectation type "+expectations.getClass().getSimpleName()+" to rewrite!");
+        }
+    }
+
+    private ExpectationTreeNode rewriteAndExpectations(AndNode andExpectations, Token t) {
+        if (andExpectations.children.size()!=2) {
+            throw new RuntimeException("Implement AND rewrite rule for more than two children!");
+        }
+        // NOTE: In case of an And it is always the leftmost node that is matched
+        // the left child node is matched, we can forget about it.
+        // The new expectation is the right child node
+        ExpectationTreeNode rightNode = andExpectations.getRightNode();
+        return rightNode;
     }
 }
