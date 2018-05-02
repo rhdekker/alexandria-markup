@@ -29,10 +29,6 @@ public class AndNode extends ExpectationTreeNode {
         return children.get(0);
     }
 
-    private int size() {
-        return children.size();
-    }
-
     public ExpectationTreeNode getRightNode() {
         if (size() != 2) {
             throw new RuntimeException("We cannot yet handle more than two children!");

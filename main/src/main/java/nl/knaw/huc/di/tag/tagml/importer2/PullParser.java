@@ -56,28 +56,11 @@ public class PullParser {
         List<Token> tokens = tokenStream.getTokens();
 
         for (Token t: tokens) {
-            // check whether the next token t is equal to expectation
-            // if not throw error!
-            if (t.getType() != expectations.getType()) {
-                throw new ExpectationError(expectations, t);
-            }
+            // evaluate token against expectation
+            expectations.evaluateToken(t);
             // based on the current expectations and the actual we generate new expectations
-            // TODO
             this.expectations = rewriteExpectations(expectations, t);
         }
-
-
-
-
-
-//        System.out.println(tokens);
-//        System.out.println(tokens.get(0).getType());
-//       // TAGMLLexer.
-//        System.out.println(tokens.get(0).getText());
-//
-//        // In the first example the token is 6, which is the default text in the TAGMLLexer.
-//        //Now I need to setup the expectations as nodes in a tree
-//
 
         return null;
     }
@@ -85,9 +68,16 @@ public class PullParser {
     private ExpectationTreeNode rewriteExpectations(ExpectationTreeNode expectations, Token t) {
         if (expectations.getClass() == AndNode.class) {
             return rewriteAndExpectations((AndNode) expectations, t);
-        } else {
+        } else if (expectations.getClass() == TerminalNode.class) {
+            return rewriteTerminalExpectations((TerminalNode)expectations, t);
+        }
+            {
             throw new UnsupportedOperationException("Unknown expectation type "+expectations.getClass().getSimpleName()+" to rewrite!");
         }
+    }
+
+    private ExpectationTreeNode rewriteTerminalExpectations(TerminalNode expectations, Token t) {
+        return null;
     }
 
     private ExpectationTreeNode rewriteAndExpectations(AndNode andExpectations, Token t) {
