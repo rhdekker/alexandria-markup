@@ -54,17 +54,29 @@ public class PullParser {
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         tokenStream.fill();
         List<Token> tokens = tokenStream.getTokens();
-        System.out.println(tokens);
-        System.out.println(tokens.get(0).getType());
-       // TAGMLLexer.
-        System.out.println(tokens.get(0).getText());
 
-        // In the first example the token is 6, which is the default text in the TAGMLLexer.
-        //Now I need to setup the expectations as nodes in a tree
-
-        if (tokens.get(0).getType() != expectations.getType()) {
-            throw new ExpectationError(expectations, tokens.get(0));
+        for (Token t: tokens) {
+            // check whether the next token t is equal to expectation
+            // if not throw error!
+            if (t.getType() != expectations.getType()) {
+                throw new ExpectationError(expectations, t);
+            }
+            // based on the current expectations and the actual we generate new expectations
+            // TODO
         }
+
+
+
+
+
+//        System.out.println(tokens);
+//        System.out.println(tokens.get(0).getType());
+//       // TAGMLLexer.
+//        System.out.println(tokens.get(0).getText());
+//
+//        // In the first example the token is 6, which is the default text in the TAGMLLexer.
+//        //Now I need to setup the expectations as nodes in a tree
+//
 
         return null;
     }
