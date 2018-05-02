@@ -26,12 +26,18 @@ import java.util.List;
 
 public class PullParser {
 
-    public DocumentWrapper importTAGML(final String input) throws TAGMLSyntaxError {
+    private final ExpectationTreeNode expectations;
+
+    public PullParser(ExpectationTreeNode expectations) {
+        this.expectations = expectations;
+    }
+
+    public DocumentWrapper importTAGML(final String input) throws TAGMLSyntaxError, ExpectationError {
         CharStream antlrInputStream = CharStreams.fromString(input);
         return importTAGML(antlrInputStream);
     }
 
-    public DocumentWrapper importTAGML(InputStream input) throws TAGMLSyntaxError {
+    public DocumentWrapper importTAGML(InputStream input) throws TAGMLSyntaxError, ExpectationError {
         try {
             CharStream antlrInputStream = CharStreams.fromStream(input);
             return importTAGML(antlrInputStream);
@@ -41,7 +47,7 @@ public class PullParser {
         }
     }
 
-    private DocumentWrapper importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
+    private DocumentWrapper importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError, ExpectationError {
         TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
         ErrorListener errorListener = new ErrorListener();
         lexer.addErrorListener(errorListener);
@@ -49,6 +55,17 @@ public class PullParser {
         tokenStream.fill();
         List<Token> tokens = tokenStream.getTokens();
         System.out.println(tokens);
+        System.out.println(tokens.get(0).getType());
+       // TAGMLLexer.
+        System.out.println(tokens.get(0).getText());
+
+        // In the first example the token is 6, which is the default text in the TAGMLLexer.
+        //Now I need to setup the expectations as nodes in a tree
+
+        if (tokens.get(0).getType() != expectations.getType()) {
+            throw new ExpectationError(expectations, tokens.get(0));
+        }
+
         return null;
     }
 }
