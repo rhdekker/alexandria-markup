@@ -3,13 +3,11 @@ package nl.knaw.huc.di.tag.tagml.importer2;
 import org.antlr.v4.runtime.Token;
 
 /*
- * author: Ronald Haentjens Dekker
- * date: 02-05-2018
+ * @author: Ronald Haentjens Dekker
  */
-public class TerminalNode extends ExpectationTreeNode {
-
-    TerminalNode() {
-        super(-1);
+public class StrictTypeNode extends ExpectationTreeNode {
+    public StrictTypeNode(int default_beginOpenMarkup) {
+        super(default_beginOpenMarkup);
     }
 
     // check whether the next token t is equal to expectation
@@ -20,6 +18,5 @@ public class TerminalNode extends ExpectationTreeNode {
         }
         return this;
     }
-
 
 }

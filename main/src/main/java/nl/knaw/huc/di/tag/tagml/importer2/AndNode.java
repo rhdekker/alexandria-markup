@@ -1,5 +1,9 @@
 package nl.knaw.huc.di.tag.tagml.importer2;
 
+import org.antlr.v4.runtime.Token;
+
+import java.util.List;
+
 /*
  * author: Ronald Haentjens Dekker
  * date: 02-05-2018
@@ -16,10 +20,22 @@ public class AndNode extends ExpectationTreeNode {
         this.children.add(terminalNode);
     }
 
-    // delegate the get type to the first child!
+    public AndNode(ExpectationTreeNode stringExpectationNode, StrictTypeNode characterClassNode, StrictTypeNode stringExpectationNode1) {
+        super(123457);
+        this.children.add(stringExpectationNode);
+        this.children.add(characterClassNode);
+        this.children.add(stringExpectationNode1);
+    }
+
+    public AndNode(List<ExpectationTreeNode> everyThingExceptTheFirstOne) {
+        super(124433);
+        this.children.addAll(everyThingExceptTheFirstOne);
+    }
+
     @Override
-    public int getType() {
-        return getFirstChildNode().getType();
+    public ExpectationTreeNode evaluateToken(Token t) throws ExpectationError {
+        // delegate the evaluation to the first child!
+        return getFirstChildNode().evaluateToken(t);
     }
 
     private ExpectationTreeNode getFirstChildNode() {
@@ -34,5 +50,10 @@ public class AndNode extends ExpectationTreeNode {
             throw new RuntimeException("We cannot yet handle more than two children!");
         }
         return children.get(1);
+    }
+
+    @Override
+    public String toString() {
+        return "AndNode: "+this.children.toString();
     }
 }

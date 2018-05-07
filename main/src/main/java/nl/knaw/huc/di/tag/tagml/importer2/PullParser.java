@@ -57,6 +57,7 @@ public class PullParser {
 
         for (Token t: tokens) {
             // evaluate token against expectation
+            System.out.println("Evaluating token: "+ t+" : "+expectations.toString());
             expectations.evaluateToken(t);
             // based on the current expectations and the actual we generate new expectations
             this.expectations = rewriteExpectations(expectations, t);
@@ -81,13 +82,18 @@ public class PullParser {
     }
 
     private ExpectationTreeNode rewriteAndExpectations(AndNode andExpectations, Token t) {
-        if (andExpectations.children.size()!=2) {
-            throw new RuntimeException("Implement AND rewrite rule for more than two children!");
-        }
-        // NOTE: In case of an And it is always the leftmost node that is matched
-        // the left child node is matched, we can forget about it.
-        // The new expectation is the right child node
-        ExpectationTreeNode rightNode = andExpectations.getRightNode();
-        return rightNode;
+        // TODO: and node is not needed when only one choice left!
+        List<ExpectationTreeNode> everyThingExceptTheFirstOne = andExpectations.children.subList(1, andExpectations.children.size());
+        ExpectationTreeNode andResult = new AndNode(everyThingExceptTheFirstOne);
+        return andResult;
+
+        //        if (andExpectations.children.size()!=2) {
+//            throw new RuntimeException("Implement AND rewrite rule for more than two children!");
+//        }
+//        // NOTE: In case of an And it is always the leftmost node that is matched
+//        // the left child node is matched, we can forget about it.
+//        // The new expectation is the right child node
+//        ExpectationTreeNode rightNode = andExpectations.getRightNode();
+//        return rightNode;
     }
 }

@@ -14,8 +14,8 @@ public class OrNode extends ExpectationTreeNode {
         super(type);
     }
 
-    // maybe evaluate token is a better name?
-    public ExpectationTreeNode evaluateType(Token token) {
+    @Override
+    public ExpectationTreeNode evaluateToken(Token token) throws ExpectationError {
         if (size()==0) {
             throw new UnsupportedOperationException("No children!");
         }

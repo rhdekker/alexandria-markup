@@ -13,7 +13,7 @@ import java.util.List;
  *
  * We express the expected Tokens as nodes of different type in a tree
  */
-public class ExpectationTreeNode {
+public abstract class ExpectationTreeNode {
 //    private final ExpectationTreeNode parent;
     private final int type;
     final List<ExpectationTreeNode> children;
@@ -37,13 +37,7 @@ public class ExpectationTreeNode {
         return children.size();
     }
 
-    // check whether the next token t is equal to expectation
-    // if not throw error!
-    public ExpectationTreeNode evaluateToken(Token t) throws ExpectationError {
-        if (t.getType() != getType()) {
-            throw new ExpectationError(this, t);
-        }
-        return this;
-    }
+    public abstract ExpectationTreeNode evaluateToken(Token t) throws ExpectationError;
+
 
 }
