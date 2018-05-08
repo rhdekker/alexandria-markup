@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * Author: Ronald Haentjens Dekker
  * date: 02-05-2018
  */
-public class CharacterClassNode extends ExpectationTreeNode {
+public class CharacterClassNode extends StrictTypeNode {
     // This node represents expectation of a text token, which contains characters
     // denoted in a character class regular expression
 

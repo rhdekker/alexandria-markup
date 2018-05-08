@@ -10,10 +10,10 @@ import org.antlr.v4.runtime.Token;
   * date: 02-05-2018
  */
 public class ExpectationError extends Throwable {
-    private final ExpectationTreeNode expectations;
+    private final StrictTypeNode expectations;
     private final Token token;
 
-    public ExpectationError(ExpectationTreeNode expectations, Token token) {
+    public ExpectationError(StrictTypeNode expectations, Token token) {
         this.expectations = expectations;
         this.token = token;
     }

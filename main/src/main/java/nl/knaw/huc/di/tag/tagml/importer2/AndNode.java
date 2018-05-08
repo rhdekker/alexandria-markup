@@ -10,18 +10,12 @@ import java.util.List;
  * date: 02-05-2018
  */
 public class AndNode extends ExpectationTreeNode {
-    AndNode() {
-        //TODO: introduce leaf nodes
-        super(1234567);
-    }
 
-    public AndNode(ExpectationTreeNode... expectationTreeNodes) {
-        super(12343);
+    AndNode(ExpectationTreeNode... expectationTreeNodes) {
         this.children.addAll(Arrays.asList(expectationTreeNodes));
     }
 
-    public AndNode(List<ExpectationTreeNode> expectationTreeNodes) {
-        super(124433);
+    AndNode(List<ExpectationTreeNode> expectationTreeNodes) {
         this.children.addAll(expectationTreeNodes);
     }
 
@@ -38,7 +32,7 @@ public class AndNode extends ExpectationTreeNode {
         return children.get(0);
     }
 
-    public ExpectationTreeNode getRightNode() {
+    ExpectationTreeNode getRightNode() {
         if (size() != 2) {
             throw new RuntimeException("We cannot yet handle more than two children!");
         }

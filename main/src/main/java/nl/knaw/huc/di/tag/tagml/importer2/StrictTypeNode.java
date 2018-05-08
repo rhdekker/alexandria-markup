@@ -6,8 +6,10 @@ import org.antlr.v4.runtime.Token;
  * @author: Ronald Haentjens Dekker
  */
 public class StrictTypeNode extends ExpectationTreeNode {
-    public StrictTypeNode(int default_beginOpenMarkup) {
-        super(default_beginOpenMarkup);
+    private final int type;
+
+    public StrictTypeNode(int expectedType) {
+        this.type = expectedType;
     }
 
     // check whether the next token t is equal to expectation
@@ -17,6 +19,10 @@ public class StrictTypeNode extends ExpectationTreeNode {
             throw new ExpectationError(this, t);
         }
         return this;
+    }
+
+    public int getType() {
+        return type;
     }
 
 }

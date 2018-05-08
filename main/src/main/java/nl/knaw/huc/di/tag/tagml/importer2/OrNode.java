@@ -7,12 +7,11 @@ import org.antlr.v4.runtime.Token;
  *
  * @author: Ronald Haentjens Dekker
  *
+ * Restriction:
+ * The children of this node have to be of type stricttypenode.
+ *
  */
 public class OrNode extends ExpectationTreeNode {
-    // just like the AndNode we do not a need a type here!
-    OrNode(int type) {
-        super(type);
-    }
 
     @Override
     public ExpectationTreeNode evaluateToken(Token token) throws ExpectationError {
@@ -24,7 +23,12 @@ public class OrNode extends ExpectationTreeNode {
         // or rather than yes... we return the node
         // there could of course be multiple so we go from the left to the right
         for (ExpectationTreeNode node : children) {
-            if (node.getType() == token.getType()) {
+            // guard against child nodes that are not of StrictTypeNode class
+            if (!(node instanceof StrictTypeNode)) {
+                throw new RuntimeException("Child node of Or node not of type StrictTypeNode, but of type: "+node.getClass());
+            }
+            StrictTypeNode stn = (StrictTypeNode) node;
+            if (stn.getType()==token.getType()) {
                 return node;
             }
         }

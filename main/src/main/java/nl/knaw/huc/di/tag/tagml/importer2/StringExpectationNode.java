@@ -9,7 +9,6 @@ import org.antlr.v4.runtime.Token;
  */
 class StringExpectationNode extends ExpectationTreeNode {
     StringExpectationNode(String expectedString) {
-        super(-1);
     }
 
     @Override

@@ -15,22 +15,11 @@ import java.util.List;
  */
 public abstract class ExpectationTreeNode {
 //    private final ExpectationTreeNode parent;
-    private final int type;
     final List<ExpectationTreeNode> children;
 
-    ExpectationTreeNode(int type) {
+    ExpectationTreeNode() {
 //        this.parent = null;
-        this.type = type;
         this.children = new ArrayList<>();
-    }
-
-//    private ExpectationTreeNode(ExpectationTreeNode parent, int type) {
-//        this.parent = parent;
-//        this.type = type;
-//    }
-
-    public int getType() {
-        return type;
     }
 
     int size() {

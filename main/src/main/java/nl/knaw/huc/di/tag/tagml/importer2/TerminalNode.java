@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * author: Ronald Haentjens Dekker
  * date: 02-05-2018
  */
-public class TerminalNode extends ExpectationTreeNode {
+public class TerminalNode extends StrictTypeNode {
 
     TerminalNode() {
         super(-1);
