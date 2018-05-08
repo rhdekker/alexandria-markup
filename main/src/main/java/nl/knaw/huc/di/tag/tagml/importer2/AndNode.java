@@ -2,6 +2,7 @@ package nl.knaw.huc.di.tag.tagml.importer2;
 
 import org.antlr.v4.runtime.Token;
 
+import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -14,22 +15,14 @@ public class AndNode extends ExpectationTreeNode {
         super(1234567);
     }
 
-    public AndNode(CharacterClassNode characterClassNode, TerminalNode terminalNode) {
-        super(1234567);
-        this.children.add(characterClassNode);
-        this.children.add(terminalNode);
+    public AndNode(ExpectationTreeNode... expectationTreeNodes) {
+        super(12343);
+        this.children.addAll(Arrays.asList(expectationTreeNodes));
     }
 
-    public AndNode(ExpectationTreeNode stringExpectationNode, StrictTypeNode characterClassNode, StrictTypeNode stringExpectationNode1) {
-        super(123457);
-        this.children.add(stringExpectationNode);
-        this.children.add(characterClassNode);
-        this.children.add(stringExpectationNode1);
-    }
-
-    public AndNode(List<ExpectationTreeNode> everyThingExceptTheFirstOne) {
+    public AndNode(List<ExpectationTreeNode> expectationTreeNodes) {
         super(124433);
-        this.children.addAll(everyThingExceptTheFirstOne);
+        this.children.addAll(expectationTreeNodes);
     }
 
     @Override

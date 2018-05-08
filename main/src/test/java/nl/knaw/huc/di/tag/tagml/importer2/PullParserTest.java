@@ -24,7 +24,7 @@ public class PullParserTest {
 
     @Test
     public void testTAGML_MarkupNonOverlapping() throws ExpectationError {
-        ExpectationTreeNode openMarker = new AndNode(new StrictTypeNode(TAGMLLexer.DEFAULT_BeginOpenMarkup), new StrictTypeNode(TAGMLLexer.IMO_NameOpenMarkup), new StrictTypeNode(TAGMLLexer.IMO_EndOpenMarkup));
+        ExpectationTreeNode openMarker = new AndNode(new StrictTypeNode(TAGMLLexer.DEFAULT_BeginOpenMarkup), new StrictTypeNode(TAGMLLexer.IMO_NameOpenMarkup), new StrictTypeNode(TAGMLLexer.IMO_EndOpenMarkup), new CharacterClassNode(), new StrictTypeNode(TAGMLLexer.DEFAULT_BeginCloseMarkup), new StrictTypeNode(TAGMLLexer.IMC_NameCloseMarkup), new StrictTypeNode(TAGMLLexer.IMC_EndCloseMarkup), new TerminalNode());
         //ExpectationTreeNode expectations = new AndNode(new CharacterClassNode(), new TerminalNode());
         String tagML = "[line>The rain in Spain falls mainly on the plain.<line]";
         PullParser parser = new PullParser(openMarker);

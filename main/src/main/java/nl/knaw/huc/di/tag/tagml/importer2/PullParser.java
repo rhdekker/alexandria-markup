@@ -1,5 +1,6 @@
 package nl.knaw.huc.di.tag.tagml.importer2;
 
+import com.google.common.collect.Sets;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Set;
 
 /*
  * TAGML Pull Parser
@@ -48,6 +50,7 @@ public class PullParser {
     }
 
     private DocumentWrapper importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError, ExpectationError {
+        Set<Class> allowedNodes = Sets.newHashSet(AndNode.class, OrNode.class, TerminalNode.class);
         TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
         ErrorListener errorListener = new ErrorListener();
         lexer.addErrorListener(errorListener);
@@ -56,6 +59,11 @@ public class PullParser {
         List<Token> tokens = tokenStream.getTokens();
 
         for (Token t: tokens) {
+            // Guard that expectations are either an and node, an or node or a Terminal node.
+            if (!allowedNodes.contains(expectations.getClass())) {
+                throw new UnsupportedOperationException("Current expectation node is not rewritable! "+expectations);
+            }
+
             // evaluate token against expectation
             System.out.println("Evaluating token: "+ t+" : "+expectations.toString());
             expectations.evaluateToken(t);
@@ -72,9 +80,7 @@ public class PullParser {
         } else if (expectations.getClass() == TerminalNode.class) {
             return rewriteTerminalExpectations((TerminalNode)expectations, t);
         }
-            {
-            throw new UnsupportedOperationException("Unknown expectation type "+expectations.getClass().getSimpleName()+" to rewrite!");
-        }
+        throw new UnsupportedOperationException("Unknown expectation type "+expectations.getClass().getSimpleName()+" to rewrite!");
     }
 
     private ExpectationTreeNode rewriteTerminalExpectations(TerminalNode expectations, Token t) {
@@ -82,18 +88,16 @@ public class PullParser {
     }
 
     private ExpectationTreeNode rewriteAndExpectations(AndNode andExpectations, Token t) {
-        // TODO: and node is not needed when only one choice left!
+        if (andExpectations.children.size()==2) {
+            // No And node is needed when there is only one choice left
+            // In case of an And it is always the leftmost node that is matched
+            // Since the left child node is matched, we can forget about it.
+            // The new expectation is the right child node
+            ExpectationTreeNode rightNode = andExpectations.getRightNode();
+            return rightNode;
+        }
         List<ExpectationTreeNode> everyThingExceptTheFirstOne = andExpectations.children.subList(1, andExpectations.children.size());
         ExpectationTreeNode andResult = new AndNode(everyThingExceptTheFirstOne);
         return andResult;
-
-        //        if (andExpectations.children.size()!=2) {
-//            throw new RuntimeException("Implement AND rewrite rule for more than two children!");
-//        }
-//        // NOTE: In case of an And it is always the leftmost node that is matched
-//        // the left child node is matched, we can forget about it.
-//        // The new expectation is the right child node
-//        ExpectationTreeNode rightNode = andExpectations.getRightNode();
-//        return rightNode;
     }
 }
