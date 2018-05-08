@@ -22,13 +22,14 @@ package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Entity(version = 1)
+@Entity(version = 2)
 public class TAGMarkup implements TAGObject {
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private Long id;
@@ -44,6 +45,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatedMarkupId;
   private Long dominatingMarkupId;
   private boolean optional = false;
+  private boolean discontinuous = false;
 
   private TAGMarkup() {
   }
@@ -54,11 +56,11 @@ public class TAGMarkup implements TAGObject {
   }
 
   public TAGMarkup(TAGDocument document, String tagName) {
-    this.documentId = document.getId();
+    this.documentId = document.getDbId();
     this.tag = tagName;
   }
 
-  public Long getId() {
+  public Long getDbId() {
     return id;
   }
 
@@ -91,7 +93,10 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
-    // TODO: this is output language dependent move to language
+    if (optional) {
+      return TAGML.OPTIONAL_PREFIX + tag;
+    }
+    // TODO: this is output language dependent: move to language dependency
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
@@ -102,11 +107,11 @@ public class TAGMarkup implements TAGObject {
   }
 
   public void addTextNode(TAGTextNode textNode) {
-    textNodeIds.add(textNode.getId());
+    textNodeIds.add(textNode.getDbId());
   }
 
   public TAGMarkup addAnnotation(TAGAnnotation annotation) {
-    annotationIds.add(annotation.getId());
+    annotationIds.add(annotation.getDbId());
     return this;
   }
 
@@ -156,6 +161,14 @@ public class TAGMarkup implements TAGObject {
     return optional;
   }
 
+  public void setDiscontinuous(final boolean discontinuous) {
+    this.discontinuous = discontinuous;
+  }
+
+  public boolean isDiscontinuous() {
+    return discontinuous;
+  }
+
   @Override
   public String toString() {
     return "[" + tag + "]";
@@ -169,6 +182,7 @@ public class TAGMarkup implements TAGObject {
   @Override
   public boolean equals(Object other) {
     return other instanceof TAGMarkup//
-        && getId().equals(((TAGMarkup) other).getId());
+        && getDbId().equals(((TAGMarkup) other).getDbId());
   }
+
 }

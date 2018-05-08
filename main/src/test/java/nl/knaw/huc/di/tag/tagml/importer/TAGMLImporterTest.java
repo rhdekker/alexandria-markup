@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -65,18 +65,67 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testTAGMLSyntaxError() {
-    String tagML = "[line>The rain in Spain falls mainly on the plain.<l]";
+  public void testCharacterEscapingInRegularText() {
+    String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
     store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail("TAGMLSyntaxError expected!");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "line 1:51 : Closing tag <l] found without corresponding open tag.\n" +
-            "Unclosed TAGML tag(s): [line>");
-      }
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(textNodeSketch("In regular text, <, [ and \\ need to be escaped, |, !, \", and ' don't."));
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
     });
+  }
+
+  @Test
+  public void testCharacterEscapingInTextVariation() {
+    String tagML = "In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("In text in between textVariation tags, "),
+//          textDivergenceSketch(),
+          textNodeSketch("<, [, | and \\ need to be escaped"),
+          textNodeSketch("!, \" and ' don't"),
+//          textConvergenceSketch(),
+          textNodeSketch(".")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(6);
+    });
+  }
+
+  @Test
+  public void testMissingEndTagThrowsTAGMLSyntaxError() {
+    String tagML = "[line>The rain";
+    String expectedErrors = "Missing close tag(s) for: [line>";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testMissingOpenTagThrowsTAGMLSyntaxError() {
+    String tagML = "on the plain.<line]";
+    String expectedErrors = "line 1:14 : Close tag <line] found without corresponding open tag.";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
+    String tagML = "[line>The Spanish rain.<paragraph]";
+    String expectedErrors = "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
+        "Missing close tag(s) for: [line>";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testNamelessTagsThrowsTAGMLSyntaxError() {
+    String tagML = "[>The Spanish rain.<]";
+    String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
+        "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
+        "line 1:19 : Nameless markup is not allowed here.";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
@@ -253,7 +302,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  //  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
@@ -284,15 +332,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUnclosedDiscontinuityLeadsToError() {
     String tagML = "[t>This is<-t], he said...";
-    store.runInTransaction(() -> {
-      try {
-        parseTAGML(tagML);
-        fail("Expected TAGMLSyntaxError");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "Some suspended markup was not resumed: <t]");
-      }
-    });
+    String expectedErrors = "Some suspended markup was not resumed: <-t]";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testFalseDiscontinuityLeadsToError() {
+    // There must be text between a pause and a resume tag, so the following example is not allowed:
+    String tagML = "[markup>Cookie <-markup][+markup> Monster<markup]";
+    String expectedErrors = "line 1:24 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Ignore
@@ -334,14 +383,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail();
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("markup [x> not closed!");
-      }
-    });
+    String expectedErrors = "markup [x> not closed!";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
@@ -352,7 +395,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(document).isNotNull();
       assertThat(document).hasTextNodesMatching(
           textNodeSketch("bla "),
-          textNodeSketch("\\|"),
+          textNodeSketch("|"),
           textNodeSketch("!"),
           textNodeSketch(" bla")
       );
@@ -511,14 +554,27 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  // private
+  // private methods
+
+  private void parseWithExpectedErrors(final String tagML, final String expectedErrors) {
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail("TAGMLSyntaxError expected!");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            expectedErrors);
+      }
+    });
+  }
+
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
     printTokens(tagML);
     DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagML);
-    LMNLExporter lmnlExporter = new LMNLExporter(store);
-    String lmnl = lmnlExporter.toLMNL(documentWrapper);
-    LOG.info("\n\nLMNL:\n{}\n", lmnl);
+    TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+    String tagml = tagmlExporter.asTAGML(documentWrapper);
+    LOG.info("\n\nTAGML:\n{}\n", tagml);
     return documentWrapper;
   }
 
