@@ -59,8 +59,26 @@ public class MultitreeParser {
         Tree firstTree = new Tree();
 
         for (Token t: tokens) {
+            // a couple of tokens we ignore
+            if (t.getType() == TAGMLLexer.DEFAULT_BeginOpenMarkup) {
+                continue;
+            } else if (t.getType() == TAGMLLexer.IMO_EndOpenMarkup) {
+                continue;
+            } else if (t.getType() == TAGMLLexer.DEFAULT_BeginCloseMarkup) {
+                continue;
+            } else if (t.getType() == TAGMLLexer.IMC_NameCloseMarkup) {
+                continue;
+            } else if (t.getType() == TAGMLLexer.IMC_EndCloseMarkup) {
+                continue;
+            }
+
+
+            // a couple of tokens we store the temporary result
             if (t.getType() == TAGMLLexer.DEFAULT_Text) {
                 firstTree.setText(t.getText());
+            }
+            else if (t.getType() == TAGMLLexer.IMO_NameOpenMarkup) {
+                firstTree.setTag(t.getText());
             }
             else if (t.getType() == -1) {
                 break;

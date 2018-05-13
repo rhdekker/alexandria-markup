@@ -14,7 +14,8 @@ import java.util.List;
 public class Tree {
 //    private final Tree parent;
     final List<Tree> children;
-    String text="";
+    private String text="";
+    private String tag="";
 
     Tree() {
 //        this.parent = null;
@@ -31,5 +32,13 @@ public class Tree {
 
     public String getText() {
         return text;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getTag() {
+        return tag;
     }
 }
