@@ -11,34 +11,27 @@ import java.util.List;
  *
  * We express the parse results as a tree
  */
-public class Tree {
+public class Tree<T> {
 //    private final Tree parent;
-    final List<Tree> children;
-    private String text="";
-    private String tag="";
+    private T content;
+    private final List<Tree> children;
 
     Tree() {
 //        this.parent = null;
         this.children = new ArrayList<>();
     }
 
+    Tree(T content) {
+//        this.parent = null;
+        this.children = new ArrayList<>();
+        this.content = content;
+    }
+
     int size() {
         return children.size();
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getTag() {
-        return tag;
+    public T getContent() {
+        return content;
     }
 }
